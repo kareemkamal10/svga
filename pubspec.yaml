@@ -6,6 +6,7 @@ homepage: https://github.com/yyued/SVGAPlayer-Flutter
 environment:
   sdk: '>=2.19.3 <3.0.0'
 
+
 dependencies:
   flutter:
     sdk: flutter
