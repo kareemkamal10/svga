@@ -10,12 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  protobuf: ^2.0.0
-  http: ^0.13.3
-  path_drawing: ^1.0.0
-  archive: ^3.1.2
+  protobuf:
+  http: ^1.2.1
+  path_drawing:
+  archive:
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^1.0.4
+  flutter_lints:
