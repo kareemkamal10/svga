@@ -1,4 +1,5 @@
 import 'dart:ui' as ui show Image;
+import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:flutter/painting.dart';
 
@@ -21,6 +22,12 @@ class SVGADynamicEntity {
   Future<void> setImageWithUrl(String url, String forKey) async {
     this.dynamicImages[forKey] =
         await decodeImageFromList((await get(Uri.parse(url))).bodyBytes);
+  }
+  Future<void> setImageFromLocal(String url, String forKey) async {
+    final ByteData assetImageByteData = await rootBundle.load(url);
+
+    this.dynamicImages[forKey] =
+        await decodeImageFromList(assetImageByteData.buffer.asUint8List());
   }
 
   void setText(TextPainter textPainter, String forKey) {
