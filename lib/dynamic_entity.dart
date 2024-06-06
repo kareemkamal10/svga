@@ -23,9 +23,10 @@ class SVGADynamicEntity {
 
   Future<void> setImageWithUrl(String url, String forKey) async {
     var file = await CustomCacheManager.instance.getSingleFile(url);
-    final ByteData assetImageByteData = await rootBundle.load(file.path);
+    Uint8List bytes = await file.readAsBytes();
+
     this.dynamicImages[forKey] =
-        await decodeImageFromList(assetImageByteData.buffer.asUint8List());
+        await decodeImageFromList(bytes);
   }
   Future<void> setImageFromLocal(String url, String forKey) async {
     final ByteData assetImageByteData = await rootBundle.load(url);

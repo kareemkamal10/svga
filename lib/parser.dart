@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'dart:ui' as ui;
 import 'dart:typed_data' show Uint8List;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart' show decodeImageFromList;
+import 'package:flutter/painting.dart' show FileImage, decodeImageFromList;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' show get;
 import 'package:archive/archive.dart' as archive;
@@ -19,9 +19,11 @@ class SVGAParser {
 
   /// Download animation file from remote server, and decode it.
   Future<MovieEntity> decodeFromURL(String url) async {
+
     var file = await CustomCacheManager.instance.getSingleFile(url);
-    final ByteData assetImageByteData = await rootBundle.load(file.path);
-    return decodeFromBuffer(assetImageByteData.buffer.asUint8List());
+    Uint8List bytes = await file.readAsBytes();
+
+    return decodeFromBuffer(bytes);
   }
 
   /// Download animation file from bundle assets, and decode it.
