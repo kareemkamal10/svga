@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:flutter/painting.dart';
 
+import 'CustomCacheManager.dart';
+
 typedef SVGACustomDrawer = Function(Canvas canvas, int frameIndex);
 
 class SVGADynamicEntity {
@@ -20,8 +22,10 @@ class SVGADynamicEntity {
   }
 
   Future<void> setImageWithUrl(String url, String forKey) async {
+    var file = await CustomCacheManager.instance.getSingleFile(url);
+    final ByteData assetImageByteData = await rootBundle.load(file.path);
     this.dynamicImages[forKey] =
-        await decodeImageFromList((await get(Uri.parse(url))).bodyBytes);
+        await decodeImageFromList(assetImageByteData.buffer.asUint8List());
   }
   Future<void> setImageFromLocal(String url, String forKey) async {
     final ByteData assetImageByteData = await rootBundle.load(url);
