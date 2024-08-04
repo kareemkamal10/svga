@@ -27,7 +27,7 @@ class SVGADynamicEntity {
     Uint8List bytes = await file.readAsBytes();
     final image = img.decodeImage(bytes)!;
     final resizedImage = img.copyResize(image, width: 100, height: 100);
-    final circularImage = img.copyCropCircle(resizedImage,radius: 80);
+    final circularImage = img.copyCropCircle(resizedImage,radius: 50);
     Uint8List im=  Uint8List.fromList(img.encodePng(circularImage));
     this.dynamicImages[forKey] =
         await decodeImageFromList(im);
