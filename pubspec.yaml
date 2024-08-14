@@ -14,8 +14,8 @@ dependencies:
   http: ^1.2.1
   flutter_cache_manager: ^3.4.1
   path_drawing:
-  archive:
-  image:
+  archive: ^3.6.1
+
 
 dev_dependencies:
   flutter_test:

@@ -2,7 +2,6 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:flutter/painting.dart';
-import 'package:image/image.dart' as img;
 
 import 'CustomCacheManager.dart';
 
@@ -25,12 +24,12 @@ class SVGADynamicEntity {
   Future<void> setImageWithUrl(String url, String forKey) async {
     var file = await CustomCacheManager.instance.getSingleFile(url);
     Uint8List bytes = await file.readAsBytes();
-    final image = img.decodeImage(bytes)!;
-    final resizedImage = img.copyResize(image, width: 100, height: 100);
-    final circularImage = img.copyCropCircle(resizedImage,radius: 50);
-    Uint8List im=  Uint8List.fromList(img.encodePng(circularImage));
+    // final image = img.decodeImage(bytes)!;
+    // final resizedImage = img.copyResize(image, width: 100, height: 100);
+    // final circularImage = img.copyCropCircle(resizedImage,radius: 50);
+    // Uint8List im=  Uint8List.fromList(img.encodePng(circularImage));
     this.dynamicImages[forKey] =
-        await decodeImageFromList(im);
+        await decodeImageFromList(bytes);
   }
   Future<void> setImageFromLocal(String url, String forKey) async {
     final ByteData assetImageByteData = await rootBundle.load(url);
