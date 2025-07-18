@@ -1,16 +1,12 @@
-# 📄 .github/workflows/rdp-with-guacamole.yml
-
 name: RDP with Guacamole Access
 
 on:
   workflow_dispatch:
 
 jobs:
-  setup-windows-rdp:
+  rdp-with-guacamole:
     runs-on: windows-latest
     timeout-minutes: 360
-    outputs:
-      runner_ip: ${{ steps.get_ip.outputs.ip }}
 
     steps:
     - name: Enable RDP and create user
@@ -21,39 +17,25 @@ jobs:
         Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
         echo ✅ RDP Enabled and User Created.
 
-    - name: Print IP Address
-      id: get_ip
+    - name: Install Docker Desktop
       run: |
-        $ip = (Test-Connection -ComputerName (hostname) -Count 1).IPV4Address.IPAddressToString
-        echo "::set-output name=ip::$ip"
-        echo "📡 Detected Windows Runner IP: $ip"
+        choco install docker-desktop --confirm
+        echo ✅ Docker Installed
 
-    - name: Keep alive
+    - name: Start Docker service
       run: |
-        while ($true) { Start-Sleep -Seconds 300 }
-
-  guacamole:
-    needs: setup-windows-rdp
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-
-    steps:
-    - name: Install Docker
-      run: |
-        sudo apt update
-        sudo apt install -y docker.io docker-compose
-        sudo usermod -aG docker $USER
+        Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+        Start-Sleep -Seconds 30
 
     - name: Create docker-compose file
+      shell: pwsh
       run: |
-        cat <<EOF > docker-compose.yml
-        version: "2"
+        echo 'version: "2"
         services:
           guacd:
             image: guacamole/guacd
             container_name: guacd
             restart: always
-
           guacamole:
             image: guacamole/guacamole
             container_name: guacamole
@@ -64,33 +46,38 @@ jobs:
               GUACD_HOSTNAME: guacd
               GUACAMOLE_HOME: /guac-home
             volumes:
-              - ./guac-home:/guac-home
-        EOF
+              - ./guac-home:/guac-home' | Out-File -Encoding utf8 docker-compose.yml
 
-    - name: Setup Guacamole RDP connection config
+    - name: Setup Guacamole config
+      shell: pwsh
       run: |
-        mkdir -p guac-home/extensions
-        mkdir -p guac-home/user-mapping
-        cat <<EOF > guac-home/user-mapping.xml
-        <user-mapping>
-          <authorize username="admin" password="admin">
-            <connection name="Windows-RDP">
-              <protocol>rdp</protocol>
-              <param name="hostname">${{ needs.setup-windows-rdp.outputs.runner_ip }}</param>
-              <param name="port">3389</param>
-              <param name="username">guacuser</param>
-              <param name="password">guacpass</param>
-            </connection>
-          </authorize>
-        </user-mapping>
-        EOF
+        mkdir guac-home
+        mkdir guac-home\user-mapping
+        $xml = @"
+<user-mapping>
+  <authorize username="admin" password="admin">
+    <connection name="Windows-RDP">
+      <protocol>rdp</protocol>
+      <param name="hostname">127.0.0.1</param>
+      <param name="port">3389</param>
+      <param name="username">guacuser</param>
+      <param name="password">guacpass</param>
+    </connection>
+  </authorize>
+</user-mapping>
+"@
+        $xml | Out-File -Encoding utf8 guac-home\user-mapping.xml
 
-    - name: Start Guacamole with Docker
+    - name: Start Guacamole containers
       run: docker-compose up -d
 
-    - name: Tunnel with Serveo
+    - name: Tunnel using Serveo
       run: |
         ssh -o StrictHostKeyChecking=no -R 80:localhost:8080 serveo.net &
-        sleep 15
-        echo "🌐 Access the RDP via browser using Serveo link above (port 80)"
-        echo "👤 Login: admin / admin"
+        timeout /t 15
+        echo 🌐 Access from browser using Serveo public link on port 80
+        echo 👤 Login: admin / admin
+
+    - name: Keep session alive
+      run: |
+        while ($true) { Start-Sleep -Seconds 300 }
