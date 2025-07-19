@@ -15,4 +15,4 @@ jobs:
     - name: Run Guacamole Setup PowerShell Script
       shell: pwsh
       run: |
-        ./.github/workflows/guacamole-setup.ps1
+        ./.github/workflows/guacamole_setup.ps1
