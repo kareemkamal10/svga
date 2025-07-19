@@ -44,8 +44,13 @@ Start-Sleep -Seconds 10
 # Download and Start Cloudflare Tunnel
 Invoke-WebRequest -Uri "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe" -OutFile "cloudflared.exe"
 Start-Process -NoNewWindow -FilePath ".\cloudflared.exe" -ArgumentList "tunnel --url http://localhost:8080" -RedirectStandardOutput "cf.log" -RedirectStandardError "cf_err.log"
-Start-Sleep -Seconds 15
-$link = (Get-Content cf.log | Select-String -Pattern "https://.*trycloudflare.com" | Select-Object -First 1).Line
+Start-Sleep -Seconds 45
+
+echo "---- محتويات cf.log ----"
+Get-Content cf.log
+echo "------------------------"
+
+$link = (Get-Content cf.log | Select-String -Pattern "https://[a-zA-Z0-9-]+\.trycloudflare\.com" | Select-Object -First 1).Matches.Value
 if ($link) {
     echo "🌍 رابط Guacamole: $link/guacamole"
 } else {
