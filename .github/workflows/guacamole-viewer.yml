@@ -70,7 +70,7 @@ jobs:
         </user-mapping>
         EOF
     - name: Start Guacamole
-      run: docker-compose up -d
+      run: docker compose up -d
 
     - name: Expose Guacamole via Serveo
       run: |
