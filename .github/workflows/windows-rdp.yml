@@ -1,0 +1,31 @@
+name: Windows RDP
+
+on:
+  workflow_dispatch:
+
+jobs:
+  setup-windows-rdp:
+    runs-on: windows-latest
+    timeout-minutes: 360
+
+    steps:
+    - name: Enable RDP and create user
+      run: |
+        net user guacuser guacpass /add
+        net localgroup administrators guacuser /add
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f
+        Enable-NetFirewallRule -DisplayGroup "Remote Desktop"
+        echo ✅ RDP Enabled and User Created.
+
+    - name: Get and expose IP
+      id: get_ip
+      shell: pwsh
+      run: |
+        $ip = (Test-Connection -ComputerName (hostname) -Count 1).IPV4Address.IPAddressToString
+        echo "ip=$ip" >> $env:GITHUB_OUTPUT
+        echo "📡 Detected Windows Runner IP: $ip"
+
+    - name: Keep Alive (6h)
+      run: |
+        while ($true) { Start-Sleep -Seconds 300 }
+        
