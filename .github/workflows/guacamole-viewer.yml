@@ -72,26 +72,15 @@ jobs:
     - name: Start Guacamole
       run: docker compose up -d
 
-    - name: Expose Guacamole via Serveo
+    - name: Expose with Cloudflare Tunnel
       run: |
-        # إعادة محاولة الاتصال عدة مرات
-        for i in {1..3}; do
-          echo "محاولة اتصال Serveo رقم $i..."
-          ssh -o StrictHostKeyChecking=no -R 80:localhost:8080 serveo.net -o ServerAliveInterval=60 > serveo.log 2>&1 &
-          SERVEO_PID=$!
-          sleep 15
-          SERVEO_URL=$(grep -o 'https://.*\.serveo\.net' serveo.log || echo "")
-          if [[ ! -z "$SERVEO_URL" ]]; then
-            echo "🌐 تم إنشاء رابط Serveo: ${SERVEO_URL}/guacamole/"
-            echo "👤 بيانات الدخول: admin / admin"
-            break
-          else
-            echo "❌ فشلت المحاولة $i. جاري إعادة المحاولة..."
-            kill $SERVEO_PID 2>/dev/null || true
-          fi
-        done
-        echo "محتويات سجل Serveo للتشخيص:"
-        cat serveo.log
+        wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+        sudo dpkg -i cloudflared-linux-amd64.deb
+        nohup cloudflared tunnel --url http://localhost:8080 > cloudflared.log 2>&1 &
+        sleep 10
+        TUNNEL_URL=$(grep -o "https://.*trycloudflare.com" cloudflared.log | head -n1)
+        echo "🌐 رابط Cloudflare Tunnel: ${TUNNEL_URL}/guacamole/"
+        echo "👤 بيانات الدخول: admin / admin"
     - name: Keep Alive (6h)
       run: |
           while true; do
