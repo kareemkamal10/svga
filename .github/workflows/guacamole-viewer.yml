@@ -78,3 +78,6 @@ jobs:
         sleep 15
         echo "🌐 Access your RDP via browser (Serveo link should appear above)."
         echo "👤 Login: admin / admin"
+    - name: Keep Alive (6h)
+      run: |
+        while ($true) { Start-Sleep -Seconds 300 }
