@@ -21,7 +21,8 @@ jobs:
       id: get_ip
       shell: pwsh
       run: |
-        $ip = (ipconfig | Select-String "IPv4 Address").ToString().Split(":")[-1].Trim()
+        $line = (ipconfig | Select-String "IPv4 Address")[0]
+        $ip = $line.ToString().Split(":")[-1].Trim()
         echo "ip=$ip" >> $env:GITHUB_OUTPUT
         echo "📡 Detected Windows Runner IP: $ip"
 
