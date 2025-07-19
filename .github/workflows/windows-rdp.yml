@@ -50,3 +50,9 @@ jobs:
         echo "🔑 VNC password: 123456"
         echo "🌐 Open the public URL from the previous step in your browser"
         echo "-------------------------------------------"
+    - name: Keep Alive (6h)
+      run: |
+          while true; do
+            sleep 300
+          done
+
