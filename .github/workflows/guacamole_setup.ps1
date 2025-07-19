@@ -10,8 +10,8 @@ Invoke-WebRequest -Uri "https://downloads.apache.org/guacamole/1.5.4/binary/guac
 mkdir C:\Guacamole\tomcat\webapps -Force
 Move-Item guacamole.war C:\Guacamole\tomcat\webapps\ROOT.war
 
-# Download Tomcat
-Invoke-WebRequest -Uri "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.27/bin/apache-tomcat-10.1.27-windows-x64.zip" -OutFile "tomcat.zip"
+# Download Tomcat (updated to 10.1.43)
+Invoke-WebRequest -Uri "https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.43/bin/apache-tomcat-10.1.43-windows-x64.zip" -OutFile "tomcat.zip"
 Expand-Archive tomcat.zip -DestinationPath C:\Guacamole\tomcat
 echo ✅ Tomcat extracted.
 
@@ -37,8 +37,8 @@ Copy-Item C:\Guacamole\config\user-mapping.xml C:\Guacamole\tomcat\.guacamole\
 # Set GUACAMOLE_HOME env
 [System.Environment]::SetEnvironmentVariable("GUACAMOLE_HOME", "C:\Guacamole\tomcat\.guacamole", [System.EnvironmentVariableTarget]::Machine)
 
-# Start Tomcat
-Start-Process -FilePath "C:\Guacamole\tomcat\apache-tomcat-10.1.27\bin\startup.bat"
+# Start Tomcat (make sure version matches)
+Start-Process -FilePath "C:\Guacamole\tomcat\apache-tomcat-10.1.43\bin\startup.bat"
 Start-Sleep -Seconds 10
 
 # Download and Start Cloudflare Tunnel
