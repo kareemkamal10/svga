@@ -1,0 +1,72 @@
+name: Guacamole Web RDP Viewer
+
+on:
+  workflow_dispatch:
+    inputs:
+      rdp_ip:
+        description: 'IP Address of Windows Runner (من الخطوة السابقة)'
+        required: true
+        default: '127.0.0.1'  # ضع الـ IP هنا عند التشغيل من الواجهة
+
+jobs:
+  guacamole:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+    - name: Install Docker
+      run: |
+        sudo apt update
+        sudo apt install -y docker.io docker-compose
+        sudo usermod -aG docker $USER
+
+    - name: Create docker-compose file
+      run: |
+        cat <<EOF > docker-compose.yml
+        version: "2"
+        services:
+          guacd:
+            image: guacamole/guacd
+            container_name: guacd
+            restart: always
+
+          guacamole:
+            image: guacamole/guacamole
+            container_name: guacamole
+            restart: always
+            ports:
+              - "8080:8080"
+            environment:
+              GUACD_HOSTNAME: guacd
+              GUACAMOLE_HOME: /guac-home
+            volumes:
+              - ./guac-home:/guac-home
+        EOF
+
+    - name: Setup Guacamole config
+      run: |
+        mkdir -p guac-home/extensions
+        mkdir -p guac-home/user-mapping
+        cat <<EOF > guac-home/user-mapping.xml
+        <user-mapping>
+          <authorize username="admin" password="admin">
+            <connection name="Windows-RDP">
+              <protocol>rdp</protocol>
+              <param name="hostname">${{ github.event.inputs.rdp_ip }}</param>
+              <param name="port">3389</param>
+              <param name="username">guacuser</param>
+              <param name="password">guacpass</param>
+            </connection>
+          </authorize>
+        </user-mapping>
+        EOF
+
+    - name: Start Guacamole
+      run: docker-compose up -d
+
+    - name: Expose Guacamole via Serveo
+      run: |
+        ssh -o StrictHostKeyChecking=no -R 80:localhost:8080 serveo.net &
+        sleep 15
+        echo "🌐 Access your RDP via browser (Serveo link should appear above)."
+        echo "👤 Login: admin / admin"
