@@ -45,8 +45,12 @@ Start-Sleep -Seconds 10
 Invoke-WebRequest -Uri "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe" -OutFile "cloudflared.exe"
 Start-Process -NoNewWindow -FilePath ".\cloudflared.exe" -ArgumentList "tunnel --url http://localhost:8080" -RedirectStandardOutput "cf.log" -RedirectStandardError "cf_err.log"
 Start-Sleep -Seconds 15
-$url = Get-Content cf.log | Select-String -Pattern "https://.*trycloudflare.com" | Select-Object -First 1
-echo "🌍 رابط Guacamole: $url/guacamole"
+$link = (Get-Content cf.log | Select-String -Pattern "https://.*trycloudflare.com" | Select-Object -First 1).Line
+if ($link) {
+    echo "🌍 رابط Guacamole: $link/guacamole"
+} else {
+    echo "❌ لم يتم العثور على رابط Cloudflare في السجلات."
+}
 echo "👤 بيانات الدخول: admin / admin"
 
 # Keep alive
